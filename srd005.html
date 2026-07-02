@@ -9,7 +9,7 @@
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box; /* Corregido: era box-style */
+            box-sizing: border-box;
         }
 
         body, html {
@@ -18,6 +18,100 @@
             overflow: hidden;
             background: linear-gradient(to bottom, #0B001A, #1F0D3D, #4A154B);
             font-family: 'Arial', sans-serif;
+        }
+
+        /* --- Pantalla de Bloqueo (Contraseña) --- */
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 0, 26, 0.93);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .lock-box {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(218, 112, 214, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .lock-box h2 {
+            color: #FFF;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #BA55D3;
+        }
+
+        .lock-box input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #8A2BE2;
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: #FFF;
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+            width: 200px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
+        }
+
+        .lock-box input:focus {
+            border-color: #DA70D6;
+            box-shadow: 0 0 15px #DA70D6;
+            width: 220px;
+        }
+
+        .lock-box button {
+            display: block;
+            margin: 20px auto 0;
+            background: linear-gradient(45deg, #8A2BE2, #DA70D6);
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .lock-box button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #DA70D6;
+        }
+
+        .error-msg {
+            color: #FF4A4A;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Clase para desvanecer la pantalla de bloqueo */
+        .lock-screen.unlock {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.05);
         }
 
         /* --- Cielo y Estrella Fugaz --- */
@@ -49,9 +143,7 @@
                 transform: rotate(-35deg) translateX(0);
                 opacity: 1;
             }
-            70% {
-                opacity: 1;
-            }
+            70% { opacity: 1; }
             100% {
                 transform: rotate(-35deg) translateX(-1000px);
                 opacity: 0;
@@ -75,7 +167,6 @@
             padding-bottom: 20px;
         }
 
-        /* Estilo de cada flor */
         .flower {
             position: relative;
             width: 30px;
@@ -84,7 +175,6 @@
             animation: sway 3s ease-in-out infinite alternate;
         }
 
-        /* Tallo */
         .flower::before {
             content: '';
             position: absolute;
@@ -96,7 +186,6 @@
             z-index: 1;
         }
 
-        /* Pétalos */
         .petal {
             position: absolute;
             background: radial-gradient(circle, #DA70D6, #8A2BE2);
@@ -112,7 +201,6 @@
         .petal-4 { transform: rotate(216deg) translate(6px, 6px); }
         .petal-5 { transform: rotate(288deg) translate(6px, 6px); }
 
-        /* Centro de la flor */
         .center {
             position: absolute;
             top: 9px;
@@ -155,7 +243,7 @@
             100% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 15px #EE82EE, 0 0 30px #9400D3, 0 0 50px #8A2BE2; }
         }
 
-        /* --- Botón del Reproductor de Música --- */
+        /* --- Botón de Música --- */
         .music-btn {
             position: absolute;
             top: 25px;
@@ -183,7 +271,6 @@
             box-shadow: 0 0 20px #DA70D6;
         }
 
-        /* Animación para cuando la música está sonando */
         .music-btn.playing {
             animation: pulse-btn 1.5s infinite alternate;
             background: #8A2BE2;
@@ -197,11 +284,20 @@
 </head>
 <body>
 
-    <!-- Botón para activar/pausar música -->
-    <button class="music-btn" id="musicBtn">💜</button>
+    <!-- PANTALLA DE BLOQUEO -->
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-box">
+            <h2>Escribe la contraseña secreta</h2>
+            <!-- El input acepta cualquier texto, pero JS verificará que sea <3 -->
+            <input type="text" id="passwordInput" placeholder="Contraseña..." autocomplete="off">
+            <button id="unlockBtn">Entrar</button>
+            <div class="error-msg" id="errorMsg">Contraseña incorrecta, intenta de nuevo... 💜</div>
+        </div>
+    </div>
 
-    <!-- Elemento de Audio Oculto -->
-    <!-- REEMPLAZA "tu_cancion.mp3" POR EL ENLACE O ARCHIVO DE TU MÚSICA -->
+    <!-- REPRODUCTOR DE MÚSICA -->
+    <button class="music-btn" id="musicBtn">💜</button>
+    <!-- Reemplaza "tu_cancion.mp3" por tu archivo de música real -->
     <audio id="bgMusic" src="estrella-fugaz.mp3" loop></audio>
 
     <div class="sky">
@@ -215,23 +311,63 @@
     <div class="garden" id="garden"></div>
 
     <script>
-        // --- Control de la Música ---
+        // --- Elementos de la pantalla de bloqueo y música ---
+        const lockScreen = document.getElementById('lockScreen');
+        const passwordInput = document.getElementById('passwordInput');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const errorMsg = document.getElementById('errorMsg');
         const bgMusic = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('musicBtn');
 
+        // Función para validar la contraseña
+        function checkPassword() {
+            const passwordValue = passwordInput.value.trim();
+            
+            // Si la contraseña es correcta "<3"
+            if (passwordValue === "<3") {
+                lockScreen.classList.add('unlock'); // Oculta la pantalla con animación
+                
+                // Intenta reproducir la música de fondo automáticamente al entrar
+                bgMusic.play().then(() => {
+                    musicBtn.innerText = "🎵";
+                    musicBtn.classList.add('playing');
+                }).catch(error => {
+                    console.log("El navegador bloqueó el autoplay, requiere un click extra en el botón.");
+                });
+                
+                errorMsg.style.display = "none";
+            } else {
+                // Si está mal, muestra el mensaje de error y reinicia la animación
+                errorMsg.style.display = "block";
+                errorMsg.style.animation = 'none';
+                errorMsg.offsetHeight; /* truco para reiniciar animación CSS */
+                errorMsg.style.animation = 'shake 0.3s ease';
+                passwordInput.value = "";
+            }
+        }
+
+        // Eventos para validar (Hacer click en el botón o presionar ENTER)
+        unlockBtn.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // --- Control Manual de la Música (Una vez desbloqueado) ---
         musicBtn.addEventListener('click', () => {
             if (bgMusic.paused) {
                 bgMusic.play();
-                musicBtn.innerText = "🎵"; // Cambia el emoji al reproducir
+                musicBtn.innerText = "🎵";
                 musicBtn.classList.add('playing');
             } else {
                 bgMusic.pause();
-                musicBtn.innerText = "💜"; // Vuelve al corazón al pausar
+                musicBtn.innerText = "💜";
                 musicBtn.classList.remove('playing');
             }
         });
 
-        // --- Generador de Flores ---
+        // --- Generador Automático de Flores ---
         const garden = document.getElementById('garden');
         const totalFlores = 80;
 
